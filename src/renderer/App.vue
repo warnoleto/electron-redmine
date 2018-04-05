@@ -1,7 +1,9 @@
 <template>
   <v-app>
-    
-      <v-toolbar>
+      
+      <authentication v-if="!isAuthenticated"></authentication>
+
+      <v-toolbar v-if="isAuthenticated">
         <v-chip v-if="isAuthenticated">
           <v-avatar>
             <img :src="gravatarUrl" :alt="gravatarUrl">
@@ -17,7 +19,7 @@
         </v-toolbar-items>
       </v-toolbar>
 
-      <v-content>
+      <v-content  v-if="isAuthenticated">
         <router-view></router-view>
       </v-content>
   </v-app>
@@ -25,6 +27,7 @@
 
 <script>
   import {mapState, mapGetters} from 'vuex'
+  import Authentication from '@/components/Authentication'
 
   export default {
     name: 'electron-redmine',
@@ -34,7 +37,8 @@
         user: state => state.Preferences.user
       }),
       ...mapGetters([ 'isAuthenticated', 'userFullName' ])
-    }
+    },
+    components: { Authentication }
   }
 </script>
 

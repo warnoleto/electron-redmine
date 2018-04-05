@@ -7,8 +7,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'authentication',
-      component: require('@/components/Authentication').default
+      name: 'my-tasks',
+      component: require('@/components/MyTasks').default
     },
     {
       path: '/config',
