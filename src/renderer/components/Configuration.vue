@@ -1,17 +1,14 @@
 <template>
-  <v-container>
-       <v-form v-model="valid">
-            <v-container>
-                <v-select :disabled="!isAuthenticated" :items="statusList" v-model="progressStatus" label="Status Em Andamento" single-line item-text="name" item-value="id"></v-select>
-                <v-select :disabled="!isAuthenticated" :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id"></v-select>
-            </v-container>
-            <v-footer>
-                <v-btn flat @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
-                <v-btn flat @click="confirm" color="success" class="text-md-right">Salvar</v-btn>
-            </v-footer>
-       </v-form>
-       
-  </v-container>
+  <v-form v-model="valid">
+      <v-container>
+          <v-select :disabled="!isAuthenticated" :items="statusList" v-model="progressStatus" label="Status Em Andamento" single-line item-text="name" item-value="id"></v-select>
+          <v-select :disabled="!isAuthenticated" :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id"></v-select>
+      </v-container>
+      <v-footer>
+          <v-btn flat @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
+          <v-btn flat @click="confirm" color="success" class="text-md-right">Salvar</v-btn>
+      </v-footer>
+  </v-form>
 </template>
 
 <script>
@@ -31,8 +28,7 @@ export default {
   computed: {
     ...mapState({
       gravatarUrl: state => state.Preferences.gravatarUrl,
-      hostname: state => state.Preferences.hostname,
-      apiKey: state => state.Preferences.apiKey,
+      redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
       user: state => state.user
     }),
     ...mapGetters([ 'isAuthenticated', 'userFullName' ])
@@ -46,10 +42,7 @@ export default {
     }
   },
   mounted () {
-    let hostname = this.hostname
-    let apiKey = this.apiKey
-    let redmine = new Redmine(hostname, { apiKey })
-    redmine.issue_statuses((err, data) => {
+    this.redmine.issue_statuses((err, data) => {
       if (err) throw err
       this.statusList = data.issue_statuses
     })

@@ -7,6 +7,16 @@ export default new Router({
   routes: [
     {
       path: '/',
+      name: 'report',
+      component: require('@/components/ReportForm').default
+    },
+    {
+      path: '/my-time-entries',
+      name: 'my-time-entries',
+      component: require('@/components/MyTimeEntries').default
+    },
+    {
+      path: '/my-tasks',
       name: 'my-tasks',
       component: require('@/components/MyTasks').default
     },
