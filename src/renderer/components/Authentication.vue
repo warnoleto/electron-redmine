@@ -1,19 +1,26 @@
 <template>
   <v-container>
-           <v-container fluid fill-height>
-             <v-layout align-center justify-center>
-                <v-flex xs12 sm6 md6>
-                <v-form v-model="valid">
-                  <v-toolbar dark color="primary">
-                    <v-toolbar-title>Authenticação</v-toolbar-title>
-                </v-toolbar>
-                  <v-text-field label="Url do Seriço" v-model="hostname" required type="url" :validate-on-blur="true" ></v-text-field>
-                  <v-text-field label="Api Access key" v-model="apiKey" required  :validate-on-blur="true" ></v-text-field>
-                  <v-btn @click="authenticate" color="info" >Autenticar</v-btn>
-       </v-form>
-                </v-flex>
-             </v-layout>
-           </v-container>
+    <v-container fluid fill-height>
+      <v-layout align-center justify-center>
+        <v-flex xs12 sm6 md6>
+          <v-card class="elevation-1">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Authenticação</v-toolbar-title>
+            </v-toolbar>
+            <v-form v-model="valid">
+              <v-card-text>
+                <v-text-field label="Url do Seriço" v-model="hostname" required type="url" :validate-on-blur="true" ></v-text-field>
+                <v-text-field label="Api Access key" v-model="apiKey" required  :validate-on-blur="true" ></v-text-field>
+              </v-card-text>
+              <v-card-actions>
+              <v-spacer></v-spacer>
+                <v-btn @click="authenticate" color="info" >Autenticar</v-btn>
+              </v-card-actions>
+            </v-form>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-container>
   </v-container>
 </template>
 
