@@ -1,13 +1,15 @@
 <template>
   <v-form v-model="valid">
       <v-container>
+          <h3>Configurações</h3>
           <v-select :disabled="!isAuthenticated" :items="statusList" v-model="progressStatus" label="Status Em Andamento" single-line item-text="name" item-value="id"></v-select>
           <v-select :disabled="!isAuthenticated" :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id"></v-select>
+          <v-footer>
+            <v-spacer></v-spacer>
+            <v-btn @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
+            <v-btn @click="confirm" color="success" class="text-md-right">Salvar</v-btn>
+          </v-footer>
       </v-container>
-      <v-footer>
-          <v-btn flat @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
-          <v-btn flat @click="confirm" color="success" class="text-md-right">Salvar</v-btn>
-      </v-footer>
   </v-form>
 </template>
 

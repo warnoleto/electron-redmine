@@ -1,5 +1,7 @@
 <template>
   <v-container>
+    <h3>Meus Registros</h3>
+    <br>
     <v-data-table :headers="headers" :items="entries" class="elevation-1">
         <template slot="items" slot-scope="props">
             <td>{{ `#${props.item.issue.id}` }}</td>
