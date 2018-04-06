@@ -1,9 +1,9 @@
 <template>
-  <v-form v-model="valid">
+  <v-form ref="form" lazy-validation>
       <v-container>
           <h3>Configurações</h3>
-          <v-select :disabled="!isAuthenticated" :items="statusList" v-model="progressStatus" label="Status Em Andamento" single-line item-text="name" item-value="id"></v-select>
-          <v-select :disabled="!isAuthenticated" :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id"></v-select>
+          <v-select :items="statusList" v-model="workingStatus" label="Status Em Andamento" single-line item-text="name" item-value="id" required :rules="rules"></v-select>
+          <v-select :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id" required  :rules="rules"></v-select>
           <v-footer>
             <v-spacer></v-spacer>
             <v-btn @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
@@ -18,32 +18,43 @@
 import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
 
+const required = v => !!v || 'Preenchimento Obrigatório!'
+
 export default {
   data () {
     return {
-      valid: true,
-      progressStatus: '',
+      workingStatus: '',
       pausedStatus: '',
-      statusList: []
+      statusList: [],
+      rules: [required]
     }
   },
   computed: {
     ...mapState({
       gravatarUrl: state => state.Preferences.gravatarUrl,
       redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
+      preferences: state => state.Preferences,
       user: state => state.user
     }),
     ...mapGetters([ 'isAuthenticated', 'userFullName' ])
   },
   methods: {
     confirm () {
-      console.log('confirm')
+      if (this.$refs.form.validate()) {
+        let workingStatus = this.workingStatus
+        let pausedStatus = this.pausedStatus
+        this.$store.dispatch('savePreferences', {workingStatus, pausedStatus})
+      }
     },
     cancel () {
-      console.log('cancel')
+      this.$refs.form.reset()
+      this.workingStatus = this.preferences.workingStatus
+      this.pausedStatus = this.preferences.pausedStatus
     }
   },
   mounted () {
+    this.workingStatus = this.preferences.workingStatus
+    this.pausedStatus = this.preferences.pausedStatus
     this.redmine.issue_statuses((err, data) => {
       if (err) throw err
       this.statusList = data.issue_statuses

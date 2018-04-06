@@ -2,7 +2,7 @@
   <v-container>
     <h3>Meus Registros</h3>
     <br>
-    <v-data-table :headers="headers" :items="entries" class="elevation-1">
+    <v-data-table :headers="headers" :items="entries" class="elevation-1" :rows-per-page-items="[5]">
         <template slot="items" slot-scope="props">
             <td>{{ `#${props.item.issue.id}` }}</td>
             <td class="text-xs-left">{{ props.item.activity.name }}</td>
@@ -11,6 +11,7 @@
             <td class="text-xs-right">{{ props.item.hours }}</td>
         </template>
     </v-data-table>
+    <p>* Listando atividades dos ultimos {{daysToList}} dias</p>
   </v-container>
 </template>
 
@@ -24,8 +25,9 @@ export default {
   name: 'my-time-entries',
   data () {
     return {
+      daysToList: 30,
       headers: [
-        { text: '#Id', sortable: false, align: 'center' },
+        { text: '#Id', sortable: false, align: 'left' },
         { text: 'Atividade', sortable: false, align: 'left' },
         { text: 'Comentário', sortable: false, align: 'left' },
         { text: 'Data', sortable: false, align: 'left' },
@@ -42,11 +44,11 @@ export default {
   },
   methods: {
     refresh () {
-      const yesterday = moment().subtract(1, 'days').format('YYYY-MM-DD')
-      const today = moment().format('YYYY-MM-DD')
+      const startDate = moment().subtract(this.daysToList, 'days').format('YYYY-MM-DD')
+      const endDate = moment().format('YYYY-MM-DD')
       const params = {
         user_id: 'me',
-        spent_on: `><${yesterday}|${today}`
+        spent_on: `><${startDate}|${endDate}`
       }
       this.redmine.time_entries(params, (err, data) => {
         if (err) throw err
