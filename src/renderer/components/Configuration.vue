@@ -4,6 +4,7 @@
           <h3>Configurações</h3>
           <v-select :items="statusList" v-model="workingStatus" label="Status Em Andamento" single-line item-text="name" item-value="id" required :rules="rules"></v-select>
           <v-select :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id" required  :rules="rules"></v-select>
+          <workspaces></workspaces>
           <v-footer>
             <v-spacer></v-spacer>
             <v-btn @click="cancel" color="error" class="text-md-right">Cancelar</v-btn>
@@ -17,16 +18,17 @@
 
 import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
-
-const required = v => !!v || 'Preenchimento Obrigatório!'
+import rules from '@/globals/rules'
+import Workspaces from './Configuration/Workspaces'
 
 export default {
+  components: {Workspaces},
   data () {
     return {
       workingStatus: '',
       pausedStatus: '',
       statusList: [],
-      rules: [required]
+      rules: [rules.required]
     }
   },
   computed: {
