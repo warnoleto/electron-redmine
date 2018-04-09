@@ -1,16 +1,19 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
-
+import { app, Tray, Menu, BrowserWindow } from 'electron'
+import notifier from 'node-notifier'
+const path = require('path')
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
+let tray
 let mainWindow
+const trayIcon = path.join(__static, '/icon.ico')
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
@@ -27,16 +30,36 @@ function createWindow () {
 
   mainWindow.loadURL(winURL)
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
+  mainWindow.on('close', (event) => {
+    if (!app.isQuiting) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
+    return false
   })
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Abrir', click: () => mainWindow.show() },
+    { label: 'Sair', role: 'quit' }
+  ])
+  console.log(trayIcon)
+  tray = new Tray(trayIcon)
+  tray.setToolTip('Electron Redmine Desktop.')
+  tray.setTitle('Electron Redmine')
+  tray.setContextMenu(contextMenu)
 }
 
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    notifier.notify({
+      title: 'Electron Redmine',
+      message: 'Nao se preocupe ainda estou aqui!',
+      icon: trayIcon,
+      sound: true,
+      timeout: 1
+    })
   }
 })
 
