@@ -1,9 +1,10 @@
 <template>
-  <v-form ref="form" lazy-validation>
       <v-container>
+          <v-form ref="form" lazy-validation>
           <h3>Configurações</h3>
           <v-select :items="statusList" v-model="workingStatus" label="Status Em Andamento" single-line item-text="name" item-value="id" required :rules="rules"></v-select>
           <v-select :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id" required  :rules="rules"></v-select>
+          </v-form>
           <workspaces></workspaces>
           <v-footer>
             <v-spacer></v-spacer>
@@ -11,7 +12,6 @@
             <v-btn @click="confirm" color="success" class="text-md-right">Salvar</v-btn>
           </v-footer>
       </v-container>
-  </v-form>
 </template>
 
 <script>

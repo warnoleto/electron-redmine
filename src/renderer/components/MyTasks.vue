@@ -5,7 +5,7 @@
     <v-data-table :headers="headers" :items="tasks" hide-actions class="elevation-1" :rows-per-page-items="[5]">
         <template slot="items" slot-scope="props">
             <td>{{ `#${props.item.id}` }}</td>
-            <td class="text-xs-left">{{ props.item.description }}</td>
+            <td class="text-xs-left">{{ props.item.subject }}</td>
             <td class="text-xs-right">{{ props.item.status.name }}</td>
         </template>
     </v-data-table>

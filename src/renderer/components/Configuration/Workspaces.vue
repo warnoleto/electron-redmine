@@ -1,51 +1,53 @@
 <template>
     <v-container>
-        <v-card>
+      <v-card>
         <v-btn color="primary" small fab absolute top right dark @click.native.stop="dialog = true"> <v-icon>add</v-icon> </v-btn>
-        </v-card>
-        <v-dialog v-model="dialog" max-width="500px">
+      </v-card>
+      <v-dialog v-model="dialog" max-width="500px">
+          <v-form ref="form" lazy-validation>
             <v-card>
-                <v-card-title>
-                <span class="headline">Workspace</span>
-                </v-card-title>
-                <v-card-text>
-                <v-container grid-list-md>
-                    <v-layout wrap>
-                        <v-flex xs12 sm12 md12>
-                            <v-text-field label="Pasta a monitorar" ref="txtPath" v-model="editedItem.path" required :rules="rules" readonly 
-                            prepend-icon="folder" append-icon="search" @click="selectDirectory"></v-text-field>
-                        </v-flex>
-                        <v-flex xs12 sm12 md12>
-                            <v-text-field label="Pattern" v-model="editedItem.pattern" required :rules="rules" prepend-icon="filter_list"></v-text-field>
-                        </v-flex>
-                    </v-layout>
-                </v-container>
-                </v-card-text>
-                <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="warning" flat @click.native="closeDialog">Cancelar</v-btn>
-                <v-btn color="primary" flat @click.native="confirmDialog">Confirmar</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+              <v-card-title>
+              <span class="headline">Workspace</span>
+              </v-card-title>
+              <v-card-text>
+              <v-container grid-list-md>
+                <v-layout wrap>
+                  <v-flex xs12 sm12 md12>
+                      <v-text-field label="Pasta a monitorar" ref="txtPath" v-model="editedItem.path" required :rules="rules" readonly 
+                      prepend-icon="folder" append-icon="search" @click="selectDirectory" lazy-validation></v-text-field>
+                  </v-flex>
+                  <v-flex xs12 sm12 md12>
+                      <v-text-field label="Pattern" v-model="editedItem.pattern" required :rules="rules" prepend-icon="filter_list" lazy-validation></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+              </v-card-text>
+              <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="warning" flat @click.native="closeDialog">Cancelar</v-btn>
+              <v-btn color="primary" flat @click.native="confirmDialog">Confirmar</v-btn>
+              </v-card-actions>
+          </v-card>
+        </v-form>
+      </v-dialog>
         
-        <v-flex xs12 sm12 mx-auto>
-        <v-data-table :headers="headers" :items="workspaces" hide-actions class="elevation-1" :rows-per-page-items="[3]">
-            <template slot="items" slot-scope="props">
-                <td class="text-xs-left">{{ props.item.path }}</td>
-                <td class="text-xs-left">{{ props.item.pattern }}</td>
-                <td class="justify-center layout px-0">
-                    <v-btn icon class="mx-0" @click="editItem(props.item)">
-                    <v-icon color="teal">edit</v-icon>
-                    </v-btn>
-                    <v-btn icon class="mx-0" @click="deleteItem(props.item)">
-                    <v-icon color="pink">delete</v-icon>
-                    </v-btn>
-                </td>
-            </template>
-        </v-data-table>
-        </v-flex>
-    </v-container>
+      <v-flex xs12 sm12 mx-auto>
+      <v-data-table :headers="headers" :items="workspaces" class="elevation-1" :rows-per-page-items="[2]">
+          <template slot="items" slot-scope="props">
+              <td class="text-xs-left">{{ props.item.path }}</td>
+              <td class="text-xs-left">{{ props.item.pattern }}</td>
+              <td class="justify-center layout px-0">
+                  <v-btn icon class="mx-0" @click="editItem(props.item)">
+                  <v-icon color="teal">edit</v-icon>
+                  </v-btn>
+                  <v-btn icon class="mx-0" @click="deleteItem(props.item)">
+                  <v-icon color="pink">delete</v-icon>
+                  </v-btn>
+              </td>
+          </template>
+      </v-data-table>
+      </v-flex>
+  </v-container>
 </template>
 
 <script>
@@ -84,14 +86,17 @@ export default {
       this.dialog = false
       this.editedIndex = -1
       this.editedItem = {}
+      this.$refs.form.reset()
     },
     confirmDialog () {
-      if (this.editedIndex > -1) {
-        Object.assign(this.workspaces[this.editedIndex], this.editedItem)
-      } else {
-        this.workspaces.push(Object.assign({}, this.editedItem))
+      if (this.$refs.form.validate()) {
+        if (this.editedIndex > -1) {
+          Object.assign(this.workspaces[this.editedIndex], this.editedItem)
+        } else {
+          this.workspaces.push(Object.assign({}, this.editedItem))
+        }
+        this.closeDialog()
       }
-      this.closeDialog()
     },
     selectDirectory () {
       const properties = ['openDirectory']

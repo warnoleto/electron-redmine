@@ -7,10 +7,10 @@
             <v-flex xs12 sm12>
               <v-select :items="tasks" v-model="task" label="Tarefa" single-line item-value="id">
                 <template slot="item" slot-scope="data">
-                  <v-list-tile-content v-text="`#${data.item.id} - ${data.item.description}`"></v-list-tile-content>
+                  <v-list-tile-content v-text="`#${data.item.id} - ${data.item.subject}`"></v-list-tile-content>
                 </template>
                 <template slot="selection" slot-scope="data">
-                  <v-list-tile-content v-text="`#${data.item.id} - ${data.item.description}`"></v-list-tile-content>
+                  <v-list-tile-content v-text="`#${data.item.id} - ${data.item.subject}`"></v-list-tile-content>
                 </template>
               </v-select>
             </v-flex>
