@@ -39,6 +39,7 @@ A server running redmine instance
 - Run it on development enviroment:
 ```sh
   $ cd electron-redmine
+  $ npm install
   $ npm run dev
 ```
 - Build a production the installer (win32):
