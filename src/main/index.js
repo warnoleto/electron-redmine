@@ -31,6 +31,7 @@ function createWindow () {
   mainWindow.loadURL(winURL)
 
   mainWindow.on('close', (event) => {
+    console.log(app.isQuiting)
     if (!app.isQuiting) {
       event.preventDefault()
       mainWindow.hide()
@@ -40,7 +41,12 @@ function createWindow () {
 
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Abrir', click: () => mainWindow.show() },
-    { label: 'Sair', role: 'quit' }
+    {
+      label: 'Sair',
+      click: () => {
+        app.isQuiting = true
+        app.quit()
+      } }
   ])
   console.log(trayIcon)
   tray = new Tray(trayIcon)
