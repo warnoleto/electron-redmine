@@ -43,6 +43,7 @@ import {mapState} from 'vuex'
 import moment from 'moment'
 import Redmine from 'node-redmine'
 import rules from '@/globals/rules'
+import RedminePostHelper from '@/globals/redmine-post-helper'
 
 export default {
   data () {
@@ -59,6 +60,7 @@ export default {
   },
   computed: {
     ...mapState({
+      prefs: state => state.Preferences,
       redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
       user: state => state.user
     }),
@@ -69,8 +71,8 @@ export default {
   methods: {
     confirm () {
       if (this.$refs.form.validate()) {
+        /*
         const params = {
-          issue_id: this.taskId,
           time_entry: {
             issue_id: this.taskId,
             spent_on: this.date,
@@ -79,8 +81,21 @@ export default {
             comments: this.comments
           }
         }
-        console.log(params)
-        this.redmine.create_time_entry(params.time_entry, (err, data) => {
+        this.redmine.create_time_entry(params, (err, data) => {
+          if (err) throw err
+          console.log(data)
+        }) */
+        const posthelper = new RedminePostHelper(this.prefs.hostname, this.prefs.apiKey)
+        const body = `<?xml version="1.0" encoding="UTF-8"?>
+                      <time_entry>
+                        <issue_id>${this.taskId}</issue_id>
+                        <activity_id>${this.activityId}</activity_id>
+                        <hours>${this.hours}</hours>
+                        <spent_on>${this.date}</spent_on>
+                        <comments>${!this.comments ? '' : this.comments}</comments>
+                      </time_entry>`
+
+        posthelper.post('time_entries.xml', body, (err, data) => {
           if (err) throw err
           console.log(data)
         })
