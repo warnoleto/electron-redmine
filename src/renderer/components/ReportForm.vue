@@ -85,7 +85,7 @@ export default {
 
         posthelper.post('time_entries.xml', params, (err, data) => {
           if (err) throw err
-          console.log(data)
+          this.$store.dispatch('success', 'Registro de tempo efetuado com sucesso')
         })
       }
     },
@@ -93,6 +93,7 @@ export default {
       this.refresh()
     },
     refresh () {
+      this.$store.dispatch('clearAlert')
       this.$refs.form.reset()
       this.date = moment().format('YYYY-MM-DD')
       this.hours = null

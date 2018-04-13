@@ -20,6 +20,9 @@
       </v-toolbar>
 
       <v-content  v-if="isAuthenticated">
+         <v-alert :type="notification.type" :value="notification.visible">
+          {{notification.message}}
+        </v-alert>
         <v-container fluid>
           <router-view></router-view>
         </v-container>
@@ -39,9 +42,13 @@
     computed: {
       ...mapState({
         gravatarUrl: state => state.Preferences.gravatarUrl,
-        user: state => state.Preferences.user
+        user: state => state.Preferences.user,
+        notification: state => state.Notifications
       }),
       ...mapGetters([ 'isAuthenticated', 'userFullName' ])
+    },
+    mounted () {
+      console.log(this.notification.type)
     },
     components: { Authentication }
   }
