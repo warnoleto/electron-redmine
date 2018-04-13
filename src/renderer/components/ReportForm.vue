@@ -71,7 +71,8 @@ export default {
   methods: {
     confirm () {
       if (this.$refs.form.validate()) {
-        /*
+        const posthelper = new RedminePostHelper(this.prefs.hostname, this.prefs.apiKey)
+
         const params = {
           time_entry: {
             issue_id: this.taskId,
@@ -81,21 +82,8 @@ export default {
             comments: this.comments
           }
         }
-        this.redmine.create_time_entry(params, (err, data) => {
-          if (err) throw err
-          console.log(data)
-        }) */
-        const posthelper = new RedminePostHelper(this.prefs.hostname, this.prefs.apiKey)
-        const body = `<?xml version="1.0" encoding="UTF-8"?>
-                      <time_entry>
-                        <issue_id>${this.taskId}</issue_id>
-                        <activity_id>${this.activityId}</activity_id>
-                        <hours>${this.hours}</hours>
-                        <spent_on>${this.date}</spent_on>
-                        <comments>${!this.comments ? '' : this.comments}</comments>
-                      </time_entry>`
 
-        posthelper.post('time_entries.xml', body, (err, data) => {
+        posthelper.post('time_entries.xml', params, (err, data) => {
           if (err) throw err
           console.log(data)
         })
