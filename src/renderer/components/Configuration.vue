@@ -18,7 +18,7 @@
 
 import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
-import rules from '@/globals/rules'
+import util from '@/globals/ui-util'
 import Workspaces from './Configuration/Workspaces'
 
 export default {
@@ -28,7 +28,7 @@ export default {
       workingStatus: '',
       pausedStatus: '',
       statusList: [],
-      rules: [rules.required]
+      rules: [util.required]
     }
   },
   computed: {
@@ -46,9 +46,11 @@ export default {
         let workingStatus = this.workingStatus
         let pausedStatus = this.pausedStatus
         this.$store.dispatch('savePreferences', {workingStatus, pausedStatus})
+        this.$store.dispatch('success', 'Preferências salvas com sucesso.')
       }
     },
     cancel () {
+      util.clearAlert()
       this.$refs.form.reset()
       this.workingStatus = this.preferences.workingStatus
       this.pausedStatus = this.preferences.pausedStatus
@@ -58,9 +60,12 @@ export default {
     this.workingStatus = this.preferences.workingStatus
     this.pausedStatus = this.preferences.pausedStatus
     this.redmine.issue_statuses((err, data) => {
-      if (err) throw err
+      util.assertNoError(err, 'Não foi possível carregar sua lista de status de tarefas.')
       this.statusList = data.issue_statuses
     })
+  },
+  beforeDestroy () {
+    util.clearAlert()
   }
 }
 </script>

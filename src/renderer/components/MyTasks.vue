@@ -16,6 +16,7 @@
 
 import Redmine from 'node-redmine'
 import {mapState} from 'vuex'
+import util from '@/globals/ui-util'
 
 export default {
   name: 'my-tasks',
@@ -37,15 +38,20 @@ export default {
   },
   methods: {
     refresh () {
+      util.clearAlert()
       this.redmine.issues({assigned_to_id: 'me'}, (err, data) => {
-        if (err) throw err
+        util.assertNoError(err, 'Não foi possível carregar sua lista de tarefas')
         this.tasks = data.issues
       })
     }
   },
   mounted () {
     this.refresh()
+  },
+  beforeDestroy () {
+    util.clearAlert()
   }
+
 }
 </script>
 

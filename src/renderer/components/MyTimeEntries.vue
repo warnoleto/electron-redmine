@@ -20,6 +20,7 @@
 import Redmine from 'node-redmine'
 import {mapState} from 'vuex'
 import moment from 'moment'
+import util from '@/globals/ui-util'
 
 export default {
   name: 'my-time-entries',
@@ -44,6 +45,7 @@ export default {
   },
   methods: {
     refresh () {
+      util.clearAlert()
       const startDate = moment().subtract(this.daysToList, 'days').format('YYYY-MM-DD')
       const endDate = moment().format('YYYY-MM-DD')
       const params = {
@@ -51,13 +53,16 @@ export default {
         spent_on: `><${startDate}|${endDate}`
       }
       this.redmine.time_entries(params, (err, data) => {
-        if (err) throw err
+        util.assertNoError(err, 'Nao foi possivel carregar a lista de registros de atividades.')
         this.entries = data.time_entries
       })
     }
   },
   mounted () {
     this.refresh()
+  },
+  beforeDestroy () {
+    util.clearAlert()
   }
 }
 </script>

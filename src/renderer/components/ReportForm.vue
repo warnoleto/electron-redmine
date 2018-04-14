@@ -42,7 +42,7 @@
 import {mapState} from 'vuex'
 import moment from 'moment'
 import Redmine from 'node-redmine'
-import rules from '@/globals/rules'
+import util from '@/globals/ui-util'
 import RedminePostHelper from '@/globals/redmine-post-helper'
 
 export default {
@@ -65,7 +65,7 @@ export default {
       user: state => state.user
     }),
     required () {
-      return rules.required
+      return util.required
     }
   },
   methods: {
@@ -84,7 +84,7 @@ export default {
         }
 
         posthelper.post('time_entries.xml', params, (err, data) => {
-          if (err) throw err
+          util.assertNoError(err, 'Falha ao registrar de atividade.')
           this.$store.dispatch('success', 'Registro de tempo efetuado com sucesso')
         })
       }
@@ -93,23 +93,26 @@ export default {
       this.refresh()
     },
     refresh () {
-      this.$store.dispatch('clearAlert')
+      util.clearAlert()
       this.$refs.form.reset()
       this.date = moment().format('YYYY-MM-DD')
       this.hours = null
       this.redmine.issues({assigned_to_id: 'me'}, (err, data) => {
-        if (err) throw err
+        util.assertNoError(err, 'Não foi possível carregar sua lista de tarefas.')
         this.tasks = data.issues
       })
 
       this.redmine.time_entry_activities((err, data) => {
-        if (err) throw err
+        util.assertNoError(err, 'Não foi possível carregar lista de atividades.')
         this.activities = data.time_entry_activities
       })
     }
   },
   mounted () {
     this.refresh()
+  },
+  beforeDestroy () {
+    util.clearAlert()
   }
 }
 </script>

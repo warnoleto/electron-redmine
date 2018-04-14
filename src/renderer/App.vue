@@ -47,9 +47,6 @@
       }),
       ...mapGetters([ 'isAuthenticated', 'userFullName' ])
     },
-    mounted () {
-      console.log(this.notification.type)
-    },
     components: { Authentication }
   }
 </script>

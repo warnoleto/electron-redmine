@@ -52,7 +52,7 @@
 
 <script>
 
-import rules from '@/globals/rules'
+import util from '@/globals/ui-util'
 import electron from 'electron'
 const {dialog} = electron.remote
 
@@ -69,7 +69,7 @@ export default {
         { text: 'Pattern', sortable: false, align: 'left' },
         { text: 'Ações', value: 'name', sortable: false, align: 'right' }
       ],
-      rules: [rules.required]
+      rules: [util.required]
     }
   },
   methods: {

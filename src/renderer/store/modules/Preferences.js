@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+import { createHash } from 'crypto'
 
 const state = {
   hostname: '',
@@ -35,7 +35,7 @@ const actions = {
     commit('SAVE_USER_INFO', user)
 
     if (user.mail) {
-      const md5 = crypto.createHash('md5')
+      const md5 = createHash('md5')
       const hash = md5.update(user.mail).digest('hex')
       commit('SAVE_GRAVATAR_URL', `http://www.gravatar.com/avatar/${hash}`)
     }

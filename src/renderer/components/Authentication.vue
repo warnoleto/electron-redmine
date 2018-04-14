@@ -7,10 +7,13 @@
             <v-toolbar dark color="primary">
               <v-toolbar-title>Authenticação</v-toolbar-title>
             </v-toolbar>
-            <v-form v-model="valid">
+            <v-alert :type="notification.type" :value="notification.visible">
+              {{notification.message}}
+            </v-alert>
+            <v-form ref="form" lazy-validation>
               <v-card-text>
-                <v-text-field label="Url do Seriço" v-model="hostname" required type="url" :validate-on-blur="true" ></v-text-field>
-                <v-text-field label="Api Access key" v-model="apiKey" required  :validate-on-blur="true" ></v-text-field>
+                <v-text-field label="Url do Seriço" v-model="hostname" required :rules="rules" type="url" ></v-text-field>
+                <v-text-field label="Api Access key" v-model="apiKey" required :rules="rules" ></v-text-field>
               </v-card-text>
               <v-card-actions>
               <v-spacer></v-spacer>
@@ -28,6 +31,7 @@
 
 import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
+import util from '@/globals/ui-util'
 
 export default {
   name: 'authentication',
@@ -35,7 +39,7 @@ export default {
     return {
       hostname: this.prefHostname,
       apiKey: this.prefApiKey,
-      valid: true
+      rules: [util.required]
     }
   },
   computed: {
@@ -43,18 +47,22 @@ export default {
       gravatarUrl: state => state.Preferences.gravatarUrl,
       prefHostname: state => state.Preferences.hostname,
       prefApiKey: state => state.Preferences.apiKey,
+      notification: state => state.Notifications,
       user: state => state.user
     }),
     ...mapGetters([ 'isAuthenticated', 'userFullName' ])
   },
   methods: {
     authenticate () {
+      if (!this.$refs.form.validate()) {
+        return
+      }
       let apiKey = this.apiKey
       let hostname = this.hostname
       let redmine = new Redmine(hostname, { apiKey })
 
       redmine.current_user({}, (err, data) => {
-        if (err) throw err
+        util.assertNoError(err, 'Não foi possível autenticar! Verifique os parâmetros informados.')
         let user = data.user
         this.$store.dispatch('authenticate', {apiKey, hostname, user})
       })
@@ -63,6 +71,9 @@ export default {
   mounted () {
     this.hostname = this.prefHostname
     this.apiKey = this.prefApiKey
+  },
+  beforeDestroy () {
+    util.clearAlert()
   }
 }
 </script>
