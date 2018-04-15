@@ -45,11 +45,11 @@
         gravatarUrl: state => state.Preferences.gravatarUrl,
         notification: state => state.Notifications
       }),
-      ...mapGetters([ 'isAuthenticated', 'userFullName' ])
+      ...mapGetters([ 'isAuthenticated', 'userFullName', 'workspaceList' ])
     },
     components: { Authentication },
     mounted () {
-      ipcRenderer.send('start-file-watch', {name: 'warley'})
+      ipcRenderer.send('request-fs-watch', this.workspaceList)
     }
   }
 </script>

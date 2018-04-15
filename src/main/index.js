@@ -2,6 +2,7 @@
 
 import { app, Tray, Menu, BrowserWindow, ipcMain } from 'electron'
 import notifier from 'node-notifier'
+import fileWatcher from './file-watcher'
 const path = require('path')
 /**
  * Set `__static` path to static files in production
@@ -74,8 +75,8 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('start-file-watch', (event, data) => {
-  console.log('message from ipcRenderer', data)
+ipcMain.on('request-fs-watch', (event, data) => {
+  fileWatcher.registerAll(data, (event, filename) => console.log(filename))
 })
 
 /**
