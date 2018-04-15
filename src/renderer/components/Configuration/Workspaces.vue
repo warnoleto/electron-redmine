@@ -58,12 +58,12 @@ const {dialog} = electron.remote
 
 export default {
   name: 'workspaces',
+  props: ['workspaces'],
   data () {
     return {
       dialog: false,
       editedIndex: -1,
       editedItem: {},
-      workspaces: [],
       headers: [
         { text: 'Diretório', sortable: false, align: 'left' },
         { text: 'Pattern', sortable: false, align: 'left' },

@@ -36,18 +36,21 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import Authentication from '@/components/Authentication'
+  import {ipcRenderer} from 'electron'
 
   export default {
     name: 'electron-redmine',
     computed: {
       ...mapState({
         gravatarUrl: state => state.Preferences.gravatarUrl,
-        user: state => state.Preferences.user,
         notification: state => state.Notifications
       }),
       ...mapGetters([ 'isAuthenticated', 'userFullName' ])
     },
-    components: { Authentication }
+    components: { Authentication },
+    mounted () {
+      ipcRenderer.send('start-file-watch', {name: 'warley'})
+    }
   }
 </script>
 

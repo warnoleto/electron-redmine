@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, Tray, Menu, BrowserWindow } from 'electron'
+import { app, Tray, Menu, BrowserWindow, ipcMain } from 'electron'
 import notifier from 'node-notifier'
 const path = require('path')
 /**
@@ -48,7 +48,6 @@ function createWindow () {
         app.quit()
       } }
   ])
-  console.log(trayIcon)
   tray = new Tray(trayIcon)
   tray.setToolTip('Electron Redmine Desktop.')
   tray.setTitle('Electron Redmine')
@@ -73,6 +72,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+ipcMain.on('start-file-watch', (event, data) => {
+  console.log('message from ipcRenderer', data)
 })
 
 /**

@@ -6,6 +6,7 @@ const state = {
   user: {},
   workingStatus: '',
   pausedStatus: '',
+  workspaces: '[]',
   gravatarUrl: ''
 }
 
@@ -26,6 +27,7 @@ const mutations = {
   SAVE_PREFERENCES (state, prefs) {
     state.workingStatus = prefs.workingStatus
     state.pausedStatus = prefs.pausedStatus
+    state.workspaces = JSON.stringify(prefs.workspaces)
   }
 }
 
@@ -59,6 +61,9 @@ const getters = {
     } else {
       return ''
     }
+  },
+  workspaceList: state => {
+    return JSON.parse(state.workspaces)
   }
 }
 
