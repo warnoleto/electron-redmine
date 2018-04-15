@@ -82,8 +82,7 @@ export default {
             comments: this.comments
           }
         }
-
-        posthelper.post('time_entries.xml', params, (err, data) => {
+        posthelper.request('POST', 'time_entries.xml', params, (err, data) => {
           util.assertNoError(err, 'Falha ao registrar de atividade.')
           this.$store.dispatch('success', 'Registro de tempo efetuado com sucesso')
         })

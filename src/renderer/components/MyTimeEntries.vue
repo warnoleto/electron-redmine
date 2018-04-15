@@ -2,7 +2,7 @@
   <v-container>
     <h3>Meus Registros</h3>
     <br>
-    <v-data-table :headers="headers" :items="entries" class="elevation-1" :rows-per-page-items="[5]">
+    <v-data-table :headers="headers" :items="entries" class="elevation-1" :rows-per-page-items="[5]" :loading="isLoading">
         <template slot="items" slot-scope="props">
             <td>{{ `#${props.item.issue.id}` }}</td>
             <td class="text-xs-left">{{ props.item.activity.name }}</td>
@@ -34,7 +34,8 @@ export default {
         { text: 'Data', sortable: false, align: 'left' },
         { text: 'Tempo', sortable: false, align: 'right' }
       ],
-      entries: []
+      entries: [],
+      isLoading: false
     }
   },
   computed: {
@@ -45,6 +46,7 @@ export default {
   },
   methods: {
     refresh () {
+      this.isLoading = true
       util.clearAlert()
       const startDate = moment().subtract(this.daysToList, 'days').format('YYYY-MM-DD')
       const endDate = moment().format('YYYY-MM-DD')
@@ -53,6 +55,7 @@ export default {
         spent_on: `><${startDate}|${endDate}`
       }
       this.redmine.time_entries(params, (err, data) => {
+        this.isLoading = false
         util.assertNoError(err, 'Nao foi possivel carregar a lista de registros de atividades.')
         this.entries = data.time_entries
       })

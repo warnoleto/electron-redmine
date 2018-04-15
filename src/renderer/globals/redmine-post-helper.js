@@ -35,11 +35,11 @@ export default class {
     return ''
   }
 
-  post = (uri, body, callback) => {
+  request = (method, uri, body, callback) => {
     body = this.jsonToXml(body)
 
     let params = {
-      method: 'POST',
+      method: method,
       headers: {
         'Content-Type': 'application/xml',
         'X-Redmine-API-Key': this.apiKey
@@ -63,4 +63,8 @@ export default class {
       })
     })
   }
+
+  // TODO: what is wrong here?
+  post = (uri, body, callback) => { request('POST', uri, body, callback) }
+  put = (uri, body, callback) => { request('PUT', uri, body, callback) }
 }
