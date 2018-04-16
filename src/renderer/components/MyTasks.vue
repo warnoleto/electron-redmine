@@ -8,11 +8,11 @@
             <td class="text-xs-left">{{ props.item.subject }}</td>
             <td class="text-xs-right">{{ props.item.status.name }}</td>
             <td class="justify-center layout px-0">
-              <v-btn icon class="mx-0" @click="startTask(props.item)">
-                <v-icon color="green">play_arrow</v-icon>
-              </v-btn>
               <v-btn v-if="isActive(props.item)" icon class="mx-0" @click="pauseTask(props.item)">
                 <v-icon color="pink">pause</v-icon>
+              </v-btn>
+              <v-btn v-else icon class="mx-0" @click="startTask(props.item)">
+                <v-icon color="green">play_arrow</v-icon>
               </v-btn>
             </td>
         </template>

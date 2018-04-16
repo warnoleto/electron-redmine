@@ -16,6 +16,7 @@
 
 <script>
 
+import {ipcRenderer} from 'electron'
 import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
 import util from '@/globals/ui-util'
@@ -49,6 +50,7 @@ export default {
         let workspaces = this.workspaces
         this.$store.dispatch('savePreferences', {workingStatus, pausedStatus, workspaces})
         this.$store.dispatch('success', 'Preferências salvas com sucesso.')
+        ipcRenderer.send('request-fs-watch', this.workspaces)
       }
     },
     cancel () {
