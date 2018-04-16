@@ -76,7 +76,7 @@ export default {
       let service = new TaskService(this.prefs)
       service.startTask(task.id, (err, data) => {
         this.isLoading = false
-        util.assertNoError(err, 'Não foi possivel iniciar a atividade!')
+        util.assertNoError(err, 'Não foi possivel iniciar a atividade! Verifique se não há outra atividade em execução.')
         this.refresh()
         this.$store.dispatch('success', 'A atividade foi ativada com sucesso.')
       })
