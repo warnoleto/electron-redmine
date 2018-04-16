@@ -2,8 +2,20 @@
       <v-container>
           <v-form ref="form" lazy-validation>
           <h3>Configurações</h3>
-          <v-select :items="statusList" v-model="workingStatus" label="Status Em Andamento" single-line item-text="name" item-value="id" required :rules="rules"></v-select>
-          <v-select :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id" required  :rules="rules"></v-select>
+          <v-container grid-list-md>
+            <v-layout row wrap>
+              <v-flex xs12 sm6>
+                <v-select :items="statusList" v-model="workingStatus" label="Status Em Andamento" single-line item-text="name" item-value="id" required :rules="rules"></v-select>
+              </v-flex>
+              <v-flex xs12 sm6>
+                <v-select :items="statusList" v-model="pausedStatus" label="Status Pausada" single-line  item-text="name" item-value="id" required  :rules="rules"></v-select>
+              </v-flex>
+              <time-field label="Entrada" v-model="entrada"></time-field>
+              <time-field label="Intervalo" v-model="intervalo"></time-field>
+              <time-field label="Retorno" v-model="retorno"></time-field>
+              <time-field label="Saída" v-model="saida"></time-field>
+            </v-layout>
+          </v-container>
           </v-form>
           <workspaces :workspaces="workspaces"></workspaces>
           <v-footer>
@@ -21,15 +33,20 @@ import Redmine from 'node-redmine'
 import {mapState, mapGetters} from 'vuex'
 import util from '@/globals/ui-util'
 import Workspaces from './Configuration/Workspaces'
+import TimeField from '@/globals/TimeField'
 
 export default {
-  components: {Workspaces},
+  components: {Workspaces, TimeField},
   data () {
     return {
       workingStatus: '',
       pausedStatus: '',
       statusList: [],
       workspaces: [],
+      entrada: '',
+      intervalo: '',
+      retorno: '',
+      saida: '',
       rules: [util.required]
     }
   },
@@ -45,10 +62,16 @@ export default {
   methods: {
     confirm () {
       if (this.$refs.form.validate()) {
-        let workingStatus = this.workingStatus
-        let pausedStatus = this.pausedStatus
-        let workspaces = this.workspaces
-        this.$store.dispatch('savePreferences', {workingStatus, pausedStatus, workspaces})
+        let params = {
+          workingStatus: this.workingStatus,
+          pausedStatus: this.pausedStatus,
+          workspaces: this.workspaces,
+          entrada: this.entrada,
+          intervalo: this.intervalo,
+          retorno: this.retorno,
+          saida: this.saida
+        }
+        this.$store.dispatch('savePreferences', params)
         this.$store.dispatch('success', 'Preferências salvas com sucesso.')
         ipcRenderer.send('request-fs-watch', this.workspaces)
       }
@@ -63,6 +86,10 @@ export default {
   mounted () {
     this.workingStatus = this.preferences.workingStatus
     this.pausedStatus = this.preferences.pausedStatus
+    this.entrada = this.preferences.entrada
+    this.intervalo = this.preferences.intervalo
+    this.retorno = this.preferences.retorno
+    this.saida = this.preferences.saida
     this.workspaces = this.workspaceList
     this.redmine.issue_statuses((err, data) => {
       util.assertNoError(err, 'Não foi possível carregar sua lista de status de tarefas.')

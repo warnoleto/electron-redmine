@@ -6,6 +6,10 @@ const state = {
   user: {},
   workingStatus: '',
   pausedStatus: '',
+  entrada: '8:00',
+  intervalo: '12:00',
+  retorno: '14:00',
+  saida: '18:00',
   workspaces: '[]',
   gravatarUrl: ''
 }
@@ -27,6 +31,10 @@ const mutations = {
   SAVE_PREFERENCES (state, prefs) {
     state.workingStatus = prefs.workingStatus
     state.pausedStatus = prefs.pausedStatus
+    state.entrada = prefs.entrada
+    state.intervalo = prefs.intervalo
+    state.retorno = prefs.retorno
+    state.saida = prefs.saida
     state.workspaces = JSON.stringify(prefs.workspaces)
   }
 }
