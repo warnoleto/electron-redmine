@@ -14,6 +14,13 @@
               <v-btn v-else icon class="mx-0" @click="startTask(props.item)">
                 <v-icon color="green">play_arrow</v-icon>
               </v-btn>
+
+              <v-btn icon v-if="isTracking(props.item)" class="mx-0" @click="stopTracking(props.item)">
+                <v-icon color="red">alarm_off</v-icon>
+              </v-btn>
+              <v-btn icon v-else class="mx-0" @click="startTracking(props.item)">
+                <v-icon color="blue-grey">alarm</v-icon>
+              </v-btn>
             </td>
         </template>
     </v-data-table>
@@ -26,6 +33,17 @@ import Redmine from 'node-redmine'
 import {mapState} from 'vuex'
 import util from '@/globals/ui-util'
 import TaskService from '@/services/TaskService'
+
+const tryFindServerErrorMessage = (err, msgDefault) => {
+  if (err) {
+    const jsonResp = JSON.parse(err)
+    if (jsonResp.Detail && jsonResp.Detail.errors && jsonResp.Detail.errors.length) {
+      const msg = jsonResp.Detail.errors.join('. ')
+      return msg
+    }
+  }
+  return msgDefault
+}
 
 export default {
   name: 'my-tasks',
@@ -45,7 +63,9 @@ export default {
     ...mapState({
       redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
       user: state => state.user,
-      prefs: state => state.Preferences
+      prefs: state => state.Preferences,
+      tracking: state => state.Tracking,
+      service: state => new TaskService(state.Preferences)
     })
   },
   methods: {
@@ -61,25 +81,32 @@ export default {
     isActive (task) {
       return task.status.id === this.prefs.workingStatus
     },
+    isTracking (task) {
+      return this.tracking.current === task.id
+    },
     pauseTask (task) {
       this.isLoading = true
-      let service = new TaskService(this.prefs)
-      service.pauseTask(task.id, (err, data) => {
+      this.service.pauseTask(task.id, (err, data) => {
         this.isLoading = false
-        util.assertNoError(err, 'Não foi possível pausar a atividade!')
+        util.assertNoError(err, tryFindServerErrorMessage(err, 'Não foi possível pausar a atividade!'))
         this.refresh()
         this.$store.dispatch('success', 'A atividade foi pausada com sucesso.')
       })
     },
     startTask (task) {
       this.isLoading = true
-      let service = new TaskService(this.prefs)
-      service.startTask(task.id, (err, data) => {
+      this.service.startTask(task.id, (err, data) => {
         this.isLoading = false
-        util.assertNoError(err, 'Não foi possivel iniciar a atividade! Verifique se não há outra atividade em execução.')
+        util.assertNoError(err, tryFindServerErrorMessage(err, 'Não foi possivel iniciar a atividade! Verifique se não há outra atividade em execução.'))
         this.refresh()
         this.$store.dispatch('success', 'A atividade foi ativada com sucesso.')
       })
+    },
+    startTracking (task) {
+      this.$store.dispatch('startTracking', task.id)
+    },
+    stopTracking (task) {
+      this.$store.dispatch('stopTracking', task.id)
     }
   },
   mounted () {

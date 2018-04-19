@@ -5,7 +5,7 @@
         <v-container grid-list-md>
           <v-layout row wrap>
             <v-flex xs12 sm12>
-              <v-select :items="tasks" v-model="taskId" label="Tarefa" single-line item-value="id" required :rules="[required]">
+              <v-select :items="tasks" v-model="taskId" label="Tarefa" single-line item-value="id" required :rules="[required]" @change="taskSelected">
                 <template slot="item" slot-scope="data">
                   <v-list-tile-content v-text="`#${data.item.id} - ${data.item.subject}`"></v-list-tile-content>
                 </template>
@@ -39,7 +39,7 @@
 
 <script>
 
-import {mapState} from 'vuex'
+import {mapState, mapGetters} from 'vuex'
 import moment from 'moment'
 import Redmine from 'node-redmine'
 import util from '@/globals/ui-util'
@@ -62,13 +62,18 @@ export default {
     ...mapState({
       prefs: state => state.Preferences,
       redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
-      user: state => state.user
+      user: state => state.user,
+      tracking: state => state.Tracking
     }),
+    ...mapGetters(['totalOfTheDay', 'entriesOfTheDay']),
     required () {
       return util.required
     }
   },
   methods: {
+    taskSelected (value) {
+      this.hours = this.totalOfTheDay(this.date, this.taskId)
+    },
     confirm () {
       if (this.$refs.form.validate()) {
         const posthelper = new RedminePostHelper(this.prefs.hostname, this.prefs.apiKey)
@@ -82,7 +87,7 @@ export default {
             comments: this.comments
           }
         }
-        posthelper.request('POST', 'time_entries.xml', params, (err, data) => {
+        posthelper.post('time_entries.xml', params, (err, data) => {
           util.assertNoError(err, 'Falha ao registrar de atividade.')
           this.$store.dispatch('success', 'Registro de tempo efetuado com sucesso')
         })

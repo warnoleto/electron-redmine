@@ -17,15 +17,15 @@ export default class {
       assigned_to_id: 'me'
     }
     this.redmine.issues(param, (err, data) => {
-      if (err) callback(new Error('Ocorreu uma falha ao tentar alterar a atividade. Tente novamente mais tarde.'))
+      if (err) callback(err)
       if (data.issues.length) callback(new Error('Você ja possui uma atividade em andamento'))
       let params = {issue: {status_id: this.workingStatus}}
-      this.postHelper.request('PUT', `/issues/${issueId}.json`, params, (err, data) => callback(err, data))
+      this.postHelper.put(`/issues/${issueId}.json`, params, (err, data) => callback(err, data))
     })
   }
 
   pauseTask = (issueId, callback) => {
     let params = {issue: {status_id: this.pausedStatus}}
-    this.postHelper.request('PUT', `/issues/${issueId}.json`, params, (err, data) => callback(err, data))
+    this.postHelper.put(`/issues/${issueId}.json`, params, (err, data) => callback(err, data))
   }
 }

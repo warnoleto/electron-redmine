@@ -64,7 +64,6 @@ export default class {
     })
   }
 
-  // TODO: what is wrong here?
-  post = (uri, body, callback) => { request('POST', uri, body, callback) }
-  put = (uri, body, callback) => { request('PUT', uri, body, callback) }
+  post = (uri, body, callback) => this.request('POST', uri, body, callback)
+  put = (uri, body, callback) => this.request('PUT', uri, body, callback)
 }
