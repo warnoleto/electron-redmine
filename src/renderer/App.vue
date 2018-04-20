@@ -49,6 +49,7 @@
     },
     components: { Authentication },
     mounted () {
+      this.$store.dispatch('clearOldTrackingEntries')
       ipcRenderer.send('request-fs-watch', this.workspaceList)
     }
   }

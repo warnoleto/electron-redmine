@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     taskSelected (value) {
-      this.hours = this.totalOfTheDay(this.date, this.taskId)
+      this.hours = this.totalOfTheDay(this.date, value)
     },
     confirm () {
       if (this.$refs.form.validate()) {
@@ -113,6 +113,8 @@ export default {
     }
   },
   mounted () {
+    console.log(this.tracking.entries)
+    console.log(this.totalOfTheDay(new Date()))
     this.refresh()
   },
   beforeDestroy () {
