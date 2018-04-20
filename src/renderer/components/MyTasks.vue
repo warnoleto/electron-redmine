@@ -72,9 +72,10 @@ export default {
     refresh () {
       this.isLoading = true
       util.clearAlert()
-      this.redmine.issues({assigned_to_id: 'me'}, (err, data) => {
+      const current = this.tracking.current
+      this.service.myIssues(current, (err, data) => {
         this.isLoading = false
-        util.assertNoError(err, 'Não foi possível carregar sua lista de tarefas')
+        util.assertNoError(err, 'Não foi possível obter suas atividades')
         this.tasks = data.issues
       })
     },

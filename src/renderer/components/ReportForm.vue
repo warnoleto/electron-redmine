@@ -41,9 +41,9 @@
 
 import {mapState, mapGetters} from 'vuex'
 import moment from 'moment'
-import Redmine from 'node-redmine'
 import util from '@/globals/ui-util'
 import RedminePostHelper from '@/globals/redmine-post-helper'
+import TaskService from '@/services/TaskService'
 
 export default {
   data () {
@@ -61,7 +61,7 @@ export default {
   computed: {
     ...mapState({
       prefs: state => state.Preferences,
-      redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
+      service: state => new TaskService(state.Preferences),
       user: state => state.user,
       tracking: state => state.Tracking
     }),
@@ -101,12 +101,12 @@ export default {
       this.$refs.form.reset()
       this.date = moment().format('YYYY-MM-DD')
       this.hours = null
-      this.redmine.issues({assigned_to_id: 'me'}, (err, data) => {
+      this.service.myIssues(this.tracking.current, (err, data) => {
         util.assertNoError(err, 'Não foi possível carregar sua lista de tarefas.')
         this.tasks = data.issues
       })
 
-      this.redmine.time_entry_activities((err, data) => {
+      this.service.timeEntryActivities((err, data) => {
         util.assertNoError(err, 'Não foi possível carregar lista de atividades.')
         this.activities = data.time_entry_activities
       })
