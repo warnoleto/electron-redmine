@@ -1,13 +1,15 @@
 import moment from 'moment'
 
 const sameDay = (dateObject, day) => moment(dateObject).isSame(day, 'day')
-const entriesOfTheDay = (date, issueId) => e => {
+
+const byEntriesOfTheDay = (date, issueId) => e => {
   if (issueId) {
     return sameDay(e.start, date) && e.issueId === issueId
   } else {
     return sameDay(e.start, date)
   }
 }
+
 const diffHours = (e) => {
   let end = e.end ? moment(e.end) : moment()
   return end.diff(moment(e.start), 'hours', true)
@@ -40,7 +42,7 @@ const mutations = {
     state.current = ''
   },
   CLEAR_OLD_TRACKING_ENTRIES (state) {
-    const byLastWeek = (e) => moment(e.start).isSameOrBefore(moment().subtract(1, 'week').startOf('week'))
+    const byLastWeek = (e) => moment(e.start).isAfter(moment().subtract(1, 'week').startOf('week'))
     const filtered = state.entries.filter(byLastWeek)
     state.entries = filtered
   }
@@ -72,14 +74,10 @@ const actions = {
 
 const getters = {
   totalOfTheDay: (state) => (date, issueId) => {
-    return state.entries.filter(entriesOfTheDay(date, issueId)).map(diffHours).reduce(sum, 0).toFixed(2)
+    return state.entries.filter(byEntriesOfTheDay(date, issueId)).map(diffHours).reduce(sum, 0).toFixed(2)
   },
   entriesOfTheDay: (state) => (date, issueId) => {
-    if (issueId) {
-      return state.entries.filter(e => e.date === date && e.issueId === issueId)
-    } else {
-      return state.entries.filter(e => e.date === date)
-    }
+    return state.entries.filter(byEntriesOfTheDay(date, issueId))
   }
 }
 

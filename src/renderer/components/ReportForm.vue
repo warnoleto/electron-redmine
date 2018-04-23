@@ -5,7 +5,7 @@
         <v-container grid-list-md>
           <v-layout row wrap>
             <v-flex xs12 sm12>
-              <v-select :items="tasks" v-model="taskId" label="Tarefa" single-line item-value="id" required :rules="[required]" @change="taskSelected">
+              <v-select :items="tasks" v-model="taskId" label="Tarefa" single-line item-value="id" required :rules="[required]" @change="taskSelected" :loading="loadingTasks">
                 <template slot="item" slot-scope="data">
                   <v-list-tile-content v-text="`#${data.item.id} - ${data.item.subject}`"></v-list-tile-content>
                 </template>
@@ -18,7 +18,7 @@
               <v-text-field label="Data" v-model="date" type="date" required :rules="[required]"></v-text-field>
             </v-flex>
             <v-flex  xs12 sm4>
-              <v-select :items="activities" v-model="activityId" label="Atividade" single-line item-text="name" item-value="id"  required :rules="[required]"></v-select>
+              <v-select :items="activities" v-model="activityId" label="Atividade" single-line item-text="name" item-value="id"  required :rules="[required]" :loading="loadingActivities"></v-select>
             </v-flex>
             <v-flex xs12 sm4>
               <v-text-field label="Tempo Gasto" v-model="hours" type="number"  required :rules="[required]"></v-text-field>
@@ -55,7 +55,9 @@ export default {
       taskId: '',
       activities: [],
       activityId: '',
-      comments: ''
+      comments: '',
+      loadingTasks: true,
+      loadingActivities: true
     }
   },
   computed: {
@@ -99,22 +101,24 @@ export default {
     refresh () {
       util.clearAlert()
       this.$refs.form.reset()
+      this.loadingTasks = true
+      this.loadingActivities = true
       this.date = moment().format('YYYY-MM-DD')
       this.hours = null
       this.service.myIssues(this.tracking.current, (err, data) => {
+        this.loadingTasks = false
         util.assertNoError(err, 'Não foi possível carregar sua lista de tarefas.')
         this.tasks = data.issues
       })
 
       this.service.timeEntryActivities((err, data) => {
+        this.loadingActivities = false
         util.assertNoError(err, 'Não foi possível carregar lista de atividades.')
         this.activities = data.time_entry_activities
       })
     }
   },
   mounted () {
-    console.log(this.tracking.entries)
-    console.log(this.totalOfTheDay(new Date()))
     this.refresh()
   },
   beforeDestroy () {

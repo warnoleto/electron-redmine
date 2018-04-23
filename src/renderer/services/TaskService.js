@@ -30,12 +30,14 @@ export default class {
   }
 
   myIssues (trackingId, callback) {
+    console.log('tracking id', trackingId)
     const isTheCurrent = item => item.id === trackingId
 
     this.redmine.issues({assigned_to_id: 'me'}, (err, issuesData) => {
       if (err) callback(err)
 
       if (trackingId && issuesData.issues.filter(isTheCurrent).length === 0) {
+        console.log('searching tracking id')
         this.redmine.get_issue_by_id(trackingId, {}, (err, currentIssueData) => {
           if (err) callback(err)
 
