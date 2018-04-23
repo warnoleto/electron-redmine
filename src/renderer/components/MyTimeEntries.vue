@@ -11,7 +11,7 @@
             <td class="text-xs-right">{{ props.item.hours }}</td>
         </template>
     </v-data-table>
-    <p>* Listando atividades dos ultimos {{daysToList}} dias</p>
+    <p>* Listando atividades dos ultimos {{daysToList}} dias. Total registrado hoje {{todayTotal}}h</p>
   </v-container>
 </template>
 
@@ -42,7 +42,14 @@ export default {
     ...mapState({
       redmine: state => new Redmine(state.Preferences.hostname, {apiKey: state.Preferences.apiKey}),
       user: state => state.user
-    })
+    }),
+    todayTotal () {
+      const today = moment()
+      return this.entries
+        .filter(e => moment(e.spent_on).isSame(today, 'day'))
+        .map(e => e.hours)
+        .reduce((a, b) => a + b, 0)
+    }
   },
   methods: {
     refresh () {
