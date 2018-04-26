@@ -37,20 +37,47 @@
   import {mapState, mapGetters} from 'vuex'
   import Authentication from '@/components/Authentication'
   import {ipcRenderer} from 'electron'
+  import moment from 'moment'
 
   export default {
     name: 'electron-redmine',
+    data () {
+      return {
+        thetimeout: null
+      }
+    },
     computed: {
       ...mapState({
         gravatarUrl: state => state.Preferences.gravatarUrl,
-        notification: state => state.Notifications
+        notification: state => state.Notifications,
+        lastEvent: state => state.Tracking.lastFileEvent,
+        currentTracking: state => state.Tracking.current
       }),
-      ...mapGetters([ 'isAuthenticated', 'userFullName', 'workspaceList' ])
+      ...mapGetters([ 'isAuthenticated', 'userFullName', 'workspaceList', 'hasWorkspaces' ])
     },
     components: { Authentication },
     mounted () {
       this.$store.dispatch('clearOldTrackingEntries')
       ipcRenderer.send('request-fs-watch', this.workspaceList)
+
+      ipcRenderer.on('file-changed', (event, data) => {
+        this.$store.dispatch('registerFileChanged')
+      })
+
+      setInterval(() => {
+        if (!this.currentTracking) {
+          return
+        }
+        if (!this.hasWorkspaces) {
+          return
+        }
+        if (moment().diff(moment(this.lastEvent), 'minutes') > 15) {
+          let message = 'O rastreamento de sua atividade foi interrompido devido a inatividade.'
+          this.$store.dispatch('stopTracking', this.currentTracking)
+          this.$store.dispatch('warn', message)
+          ipcRenderer.send('show-notification', {message})
+        }
+      }, 60000)
     }
   }
 </script>

@@ -18,7 +18,8 @@ const sum = (a, b) => a + b
 
 const state = {
   entries: [],
-  current: ''
+  current: '',
+  lastFileEvent: 0
 }
 
 const mutations = {
@@ -45,6 +46,9 @@ const mutations = {
     const byLastWeek = (e) => moment(e.start).isAfter(moment().subtract(1, 'week').startOf('week'))
     const filtered = state.entries.filter(byLastWeek)
     state.entries = filtered
+  },
+  FILE_EVENT_RECEIVED (state, timestamp) {
+    state.lastFileEvent = timestamp
   }
 
 }
@@ -58,7 +62,7 @@ const actions = {
     }
   },
   stopTracking ({commit, state}, issueId) {
-    if (state.current === issueId) {
+    if (issueId && state.current === issueId) {
       const currentMoment = moment()
       let end = currentMoment.toDate()
       commit('CLOSE_ENTRY', {issueId, end})
@@ -69,7 +73,11 @@ const actions = {
   },
   clearOldTrackingEntries ({commit}) {
     commit('CLEAR_OLD_TRACKING_ENTRIES')
+  },
+  registerFileChanged ({commit}) {
+    commit('FILE_EVENT_RECEIVED', moment().toDate())
   }
+
 }
 
 const getters = {

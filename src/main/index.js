@@ -76,7 +76,15 @@ app.on('activate', () => {
 })
 
 ipcMain.on('request-fs-watch', (event, data) => {
-  fileWatcher.registerAll(data, (event, filename) => console.log(filename))
+  fileWatcher.registerAll(data, (e, filename) => event.sender.send('file-changed', filename))
+})
+
+ipcMain.on('show-notification', (event, data) => {
+  let title = 'Electron Redmine'
+  let icon = trayIcon
+  let sound = true
+  let params = Object.assign({}, {title, icon, sound}, data)
+  notifier.notify(params)
 })
 
 /**

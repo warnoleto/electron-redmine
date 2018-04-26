@@ -72,6 +72,9 @@ const getters = {
   },
   workspaceList: state => {
     return JSON.parse(state.workspaces)
+  },
+  hasWorkspaces: state => {
+    return state.workspaces !== '[]'
   }
 }
 
