@@ -23,9 +23,7 @@
             <v-flex xs12 sm4>
               <v-text-field label="Tempo Gasto" v-model="hours" type="number"  required :rules="[required]"></v-text-field>
             </v-flex>
-            <v-flex xs12 sm12>
-              <v-text-field label="Observação" v-model="comments"></v-text-field>
-            </v-flex>
+            <tracking-chips :date="date"></tracking-chips>
           </v-layout>
         </v-container>
         <v-footer>
@@ -44,6 +42,7 @@ import moment from 'moment'
 import util from '@/globals/ui-util'
 import RedminePostHelper from '@/globals/redmine-post-helper'
 import TaskService from '@/services/TaskService'
+import TrackingChips from '@/components/ReportForm/TrackingChips'
 
 export default {
   data () {
@@ -60,6 +59,7 @@ export default {
       loadingActivities: true
     }
   },
+  components: {TrackingChips},
   computed: {
     ...mapState({
       prefs: state => state.Preferences,
@@ -70,6 +70,9 @@ export default {
     ...mapGetters(['totalOfTheDay', 'entriesOfTheDay']),
     required () {
       return util.required
+    },
+    entries () {
+      return this.entriesOfTheDay(this.date)
     }
   },
   methods: {
@@ -123,6 +126,11 @@ export default {
   },
   beforeDestroy () {
     util.clearAlert()
+  },
+  filters: {
+    time (value) {
+      return !value ? '...' : moment(value).format('HH:mm')
+    }
   }
 }
 </script>
