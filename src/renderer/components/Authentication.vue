@@ -12,7 +12,7 @@
             </v-alert>
             <v-form ref="form" lazy-validation>
               <v-card-text>
-                <v-text-field label="Url do Seriço" v-model="hostname" required :rules="rules" type="url" ></v-text-field>
+                <v-text-field label="Url do Serviço" v-model="hostname" required :rules="rules" type="url" ></v-text-field>
                 <v-text-field label="Api Access key" v-model="apiKey" required :rules="rules" ></v-text-field>
               </v-card-text>
               <v-card-actions>

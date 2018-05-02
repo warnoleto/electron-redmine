@@ -16,7 +16,10 @@ const diffHours = (e) => {
   return end.diff(moment(e.start), 'hours', true)
 }
 
-const thisMinute = (timestamp) => moment.duration(moment(timestamp).diff(moment())).asMinutes().toFixed(0) === 0
+const thisMinute = (timestamp) => {
+  const diffAsMinutes = moment.duration(moment(timestamp).diff(moment())).asMinutes().toFixed(1)
+  return Math.abs(diffAsMinutes) <= 1
+}
 
 const sum = (a, b) => a + b
 
@@ -30,10 +33,13 @@ const mutations = {
   OPEN_ENTRY (state, {issueId, start}) {
     let opens = state.entries.filter(e => sameDay(e.start, start) && !e.end)
 
-    let thisLast = state.entries
-      .filter(e => e.issueId === issueId)
-      .filter(e => thisMinute(e.end))
-    console.log(thisLast)
+    let thisLast = state.entries.filter(e => e.issueId === issueId).filter(e => e.end).filter(e => thisMinute(e.end))
+
+    if (thisLast.length) {
+      thisLast[0].end = undefined
+      state.current = issueId
+      return
+    }
 
     if (opens.length) {
       opens[0].end = start
