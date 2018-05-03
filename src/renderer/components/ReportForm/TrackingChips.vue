@@ -1,6 +1,6 @@
 <template>
     <v-flex xs12 sm12>
-        <v-chip v-for="(entry, index) in entries" outline label color="orange" :key="index">
+        <v-chip v-for="(entry, index) in entries" outline label color="orange" :key="index" close @input="close(entry)">
            <strong>{{entry.issueId | issueId}}</strong>: {{entry.start | time}} - {{entry.end | time}} ({{entry | duration}})
         </v-chip>
     </v-flex>
@@ -26,7 +26,15 @@ export default {
       return `#${value}`
     },
     duration (entry) {
-      return moment(entry.end).diff(entry.start, 'hours', true).toFixed(2)
+      const d = moment(entry.end).diff(entry.start, 'hours', true).toFixed(2)
+      return `${d}h`
+    }
+  },
+  methods: {
+    close (value) {
+      if (confirm('Deseja remover esse registro?')) {
+        this.$store.dispatch('removeTrackingEntry', value)
+      }
     }
   }
 }

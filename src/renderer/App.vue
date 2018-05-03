@@ -71,7 +71,9 @@
         if (!this.hasWorkspaces) {
           return
         }
-        if (moment().diff(moment(this.lastEvent), 'minutes') > 15) {
+        console.log(`Ultimo evendo registrado ${moment(this.lastEvent).fromNow()}`)
+        const minutesAgo = moment().subtract(15, 'minutes')
+        if (moment(this.lastEvent).isBefore(minutesAgo)) {
           let message = 'O rastreamento de sua atividade foi interrompido devido a inatividade.'
           this.$store.dispatch('stopTracking', this.currentTracking)
           this.$store.dispatch('warn', message)

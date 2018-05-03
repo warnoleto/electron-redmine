@@ -1,6 +1,11 @@
 import moment from 'moment'
 
 const sameDay = (dateObject, day) => moment(dateObject).isSame(day, 'day')
+const isToday = (timestamp) => sameDay(timestamp, moment())
+const isCurrentMinute = (timestamp) => moment(timestamp).isSame(moment(), 'minute')
+const compareStart = (a, b) => moment(a.start).diff(moment(b.start), 'seconds', true)
+const diffHours = (e) => moment(e.end).diff(moment(e.start), 'hours', true)
+const sum = (a, b) => a + b
 
 const byEntriesOfTheDay = (date, issueId) => e => {
   if (issueId) {
@@ -9,31 +14,18 @@ const byEntriesOfTheDay = (date, issueId) => e => {
     return sameDay(e.start, date)
   }
 }
-const compareStart = (a, b) => moment(a.start).diff(moment(b.start), 'seconds', true)
-
-const diffHours = (e) => {
-  let end = e.end ? moment(e.end) : moment()
-  return end.diff(moment(e.start), 'hours', true)
-}
-
-const thisMinute = (timestamp) => {
-  const diffAsMinutes = moment.duration(moment(timestamp).diff(moment())).asMinutes().toFixed(1)
-  return Math.abs(diffAsMinutes) <= 1
-}
-
-const sum = (a, b) => a + b
 
 const state = {
   entries: [],
   current: '',
-  lastFileEvent: 0
+  lastFileEvent: null
 }
 
 const mutations = {
   OPEN_ENTRY (state, {issueId, start}) {
     let opens = state.entries.filter(e => sameDay(e.start, start) && !e.end)
 
-    let thisLast = state.entries.filter(e => e.issueId === issueId).filter(e => e.end).filter(e => thisMinute(e.end))
+    let thisLast = state.entries.filter(e => e.issueId === issueId).filter(e => e.end).filter(e => isCurrentMinute(e.end))
 
     if (thisLast.length) {
       thisLast[0].end = undefined
@@ -46,7 +38,9 @@ const mutations = {
     }
     state.entries.push({issueId, start})
     state.current = issueId
+    state.lastFileEvent = moment().toDate()
   },
+
   CLOSE_ENTRY (state, {issueId, end}) {
     let opens = state.entries.filter(e => sameDay(e.start, end) && !e.end && e.issueId === issueId)
     if (opens.length) {
@@ -54,15 +48,29 @@ const mutations = {
     }
     state.current = ''
   },
+
   CLEAR_TRACKING_ENTRIES (state) {
     state.entries.length = 0
     state.current = ''
   },
+
   CLEAR_OLD_TRACKING_ENTRIES (state) {
     const byLastWeek = (e) => moment(e.start).isAfter(moment().subtract(1, 'week').startOf('week'))
     const filtered = state.entries.filter(byLastWeek)
     state.entries = filtered
   },
+
+  REMOVE_TRACKING_ENTRY (state, entry) {
+    const idx = state.entries.indexOf(entry)
+    if (idx < 0) {
+      return
+    }
+    state.entries.splice(idx, 1)
+    if (!entry.end && isToday(entry.start)) {
+      state.current = ''
+    }
+  },
+
   FILE_EVENT_RECEIVED (state, timestamp) {
     state.lastFileEvent = timestamp
   }
@@ -89,6 +97,9 @@ const actions = {
   },
   clearOldTrackingEntries ({commit}) {
     commit('CLEAR_OLD_TRACKING_ENTRIES')
+  },
+  removeTrackingEntry ({commit}, entry) {
+    commit('REMOVE_TRACKING_ENTRY', entry)
   },
   registerFileChanged ({commit}) {
     commit('FILE_EVENT_RECEIVED', moment().toDate())
