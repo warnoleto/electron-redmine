@@ -23,6 +23,9 @@
             <v-flex xs12 sm4>
               <v-text-field label="Tempo Gasto" v-model="hours" type="number"  required :rules="[required]"></v-text-field>
             </v-flex>
+            <v-flex xs12 sm4>
+              <v-text-field label="Observação" v-model="comments"></v-text-field>
+            </v-flex>
             <tracking-chips :date="date"></tracking-chips>
           </v-layout>
         </v-container>
