@@ -19,6 +19,14 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
+const showNotification = data => {
+  let title = 'Electron Redmine'
+  let icon = trayIcon
+  let sound = true
+  let params = Object.assign({}, {title, icon, sound}, data)
+  notifier.notify(params)
+}
+
 function createWindow () {
   /**
    * Initial window options
@@ -36,6 +44,7 @@ function createWindow () {
     if (!app.isQuiting) {
       event.preventDefault()
       mainWindow.hide()
+      showNotification({message: 'Nao se preocupe ainda estou aqui!', sound: false})
     }
     return false
   })
@@ -53,19 +62,13 @@ function createWindow () {
   tray.setToolTip('Electron Redmine Desktop.')
   tray.setTitle('Electron Redmine')
   tray.setContextMenu(contextMenu)
+  tray.on('click', () => mainWindow.show())
 }
 
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    notifier.notify({
-      title: 'Electron Redmine',
-      message: 'Nao se preocupe ainda estou aqui!',
-      icon: trayIcon,
-      sound: true,
-      timeout: 1
-    })
   }
 })
 
@@ -80,11 +83,7 @@ ipcMain.on('request-fs-watch', (event, data) => {
 })
 
 ipcMain.on('show-notification', (event, data) => {
-  let title = 'Electron Redmine'
-  let icon = trayIcon
-  let sound = true
-  let params = Object.assign({}, {title, icon, sound}, data)
-  notifier.notify(params)
+  showNotification(data)
 })
 
 /**

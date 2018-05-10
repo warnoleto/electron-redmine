@@ -39,6 +39,40 @@
   import {ipcRenderer} from 'electron'
   import moment from 'moment'
 
+  const notify = (ctx, message, level = 'warn') => {
+    ctx.$store.dispatch(level, message)
+    ipcRenderer.send('show-notification', {message})
+  }
+
+  const isUserHere = (ctx) => {
+    if (!ctx.currentTracking) {
+      return
+    }
+    if (!ctx.hasWorkspaces) {
+      return
+    }
+
+    const minutesAgo = moment().subtract(15, 'minutes')
+    if (moment(ctx.lastEvent).isBefore(minutesAgo)) {
+      ctx.$store.dispatch('stopTracking', ctx.currentTracking)
+      notify(ctx, 'O rastreamento de sua atividade foi interrompido devido a inatividade.')
+    }
+  }
+
+  const isShiftEnd = (ctx) => {
+    if (!ctx.currentTracking) {
+      return
+    }
+    if (moment().isSame(moment(ctx.intervalo, 'HH:mm'), 'minute')) {
+      ctx.$store.dispatch('stopTracking', ctx.currentTracking)
+      notify(ctx, 'O rastreamento de sua atividade foi interrompido para ao início do intervalo.')
+    }
+    if (moment().isSame(moment(ctx.saida, 'HH:mm'), 'minute')) {
+      ctx.$store.dispatch('stopTracking', ctx.currentTracking)
+      notify(ctx, 'O rastreamento de sua atividade foi interrompido para ao término do expediente.')
+    }
+  }
+
   export default {
     name: 'electron-redmine',
     data () {
@@ -49,6 +83,8 @@
     computed: {
       ...mapState({
         gravatarUrl: state => state.Preferences.gravatarUrl,
+        intervalo: state => state.Preferences.intervalo,
+        saida: state => state.Preferences.saida,
         notification: state => state.Notifications,
         lastEvent: state => state.Tracking.lastFileEvent,
         currentTracking: state => state.Tracking.current
@@ -65,20 +101,8 @@
       })
 
       setInterval(() => {
-        if (!this.currentTracking) {
-          return
-        }
-        if (!this.hasWorkspaces) {
-          return
-        }
-        console.log(`Ultimo evendo registrado ${moment(this.lastEvent).fromNow()}`)
-        const minutesAgo = moment().subtract(15, 'minutes')
-        if (moment(this.lastEvent).isBefore(minutesAgo)) {
-          let message = 'O rastreamento de sua atividade foi interrompido devido a inatividade.'
-          this.$store.dispatch('stopTracking', this.currentTracking)
-          this.$store.dispatch('warn', message)
-          ipcRenderer.send('show-notification', {message})
-        }
+        isUserHere(this)
+        isShiftEnd(this)
       }, 60000)
     }
   }
