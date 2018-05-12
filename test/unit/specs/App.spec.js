@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import App from '@/components/App'
+import App from '@/App'
 
 describe('App.vue', () => {
   it('should render authentication form', () => {

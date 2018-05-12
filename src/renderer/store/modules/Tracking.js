@@ -13,6 +13,8 @@ const compareStart = (a, b) => moment(a.start).diff(moment(b.start), 'seconds', 
 const diffHours = (e) => moment(e.end).diff(moment(e.start), 'hours', true)
 const diffMinutes = (e) => moment(e.end).diff(moment(e.start), 'minutes', true)
 const sum = (a, b) => a + b
+const isEntryClosed = e => e.end
+const isOpenEntry = e => !isEntryClosed(e)
 
 const byEntriesOfTheDay = (date, issueId) => e => {
   if (issueId) {
@@ -22,10 +24,19 @@ const byEntriesOfTheDay = (date, issueId) => e => {
   }
 }
 
+const state = {
+  entries: [],
+  current: null,
+  lastFileEvent: null
+}
+
 const mutations = {
   OPEN_ENTRY (state, {issueId, start}) {
-    let opens = state.entries.filter(e => sameDay(e.start, start) && !e.end)
+    if (state.current) {
+      return
+    }
 
+    let opens = state.entries.filter(e => sameDay(e.start, start)).filter(isOpenEntry)
     let thisLast = state.entries.filter(e => e.issueId === issueId).filter(e => e.end).filter(e => isCurrentMinute(e.end))
 
     if (thisLast.length) {
@@ -44,22 +55,26 @@ const mutations = {
 
   CLOSE_ENTRY (state, {issueId, end}) {
     const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
-    let opens = state.entries.filter(e => sameDay(e.start, end) && !e.end && e.issueId === issueId)
+    if (issueId && state.current !== issueId) {
+      return
+    }
+
+    let opens = state.entries.filter(e => sameDay(e.start, end) && isOpenEntry(e) && e.issueId === issueId)
     if (opens.length) {
       opens[0].end = end
       if (diffMinutes(opens[0]) <= 1) {
         removeIt(opens[0])
       }
     }
-    state.current = ''
+    state.current = null
   },
 
   CLEAR_TRACKING_ENTRIES (state, {issueId, date}) {
     const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
     state.entries.filter(byEntriesOfTheDay(date, issueId)).forEach(removeIt)
     if (issueId === state.current) {
-      state.current = ''
     }
+      state.current = ''
   },
 
   CLEAR_OLD_TRACKING_ENTRIES (state) {
@@ -87,18 +102,13 @@ const mutations = {
 
 const actions = {
   startTracking ({commit, state}, issueId) {
-    if (!state.current) {
-      const currentMoment = moment()
-      let start = currentMoment.toDate()
-      commit('OPEN_ENTRY', {issueId, start})
-    }
+    const currentMoment = moment()
+    let start = currentMoment.toDate()
+    commit('OPEN_ENTRY', {issueId, start})
   },
   stopTracking ({commit, state}, issueId) {
-    if (issueId && state.current === issueId) {
-      const currentMoment = moment()
-      let end = currentMoment.toDate()
-      commit('CLOSE_ENTRY', {issueId, end})
-    }
+    let end = moment().toDate()
+    commit('CLOSE_ENTRY', {issueId, end})
   },
   clearTrackingEntries ({commit}, {issueId, date = moment()}) {
     commit('CLEAR_TRACKING_ENTRIES', {issueId, date})
