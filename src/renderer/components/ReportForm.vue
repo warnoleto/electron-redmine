@@ -98,6 +98,9 @@ export default {
         posthelper.post('time_entries.xml', params, (err, data) => {
           util.assertNoError(err, 'Falha ao registrar de atividade.')
           this.$store.dispatch('success', 'Registro de tempo efetuado com sucesso')
+          if (confirm('Deseja remover as entradas relacionadas a essa atividade?')) {
+            this.$store.dispatch('clearTrackingEntries', {issueId: this.taskId, date: this.date})
+          }
         })
       }
     },

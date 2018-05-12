@@ -1,10 +1,17 @@
 import moment from 'moment'
 
+const state = {
+  entries: [],
+  current: '',
+  lastFileEvent: null
+}
+
 const sameDay = (dateObject, day) => moment(dateObject).isSame(day, 'day')
 const isToday = (timestamp) => sameDay(timestamp, moment())
-const isCurrentMinute = (timestamp) => moment(timestamp).isSame(moment(), 'minute')
+const isCurrentMinute = (timestamp) => moment(timestamp).diff(moment(), 'minutes', true) <= 1
 const compareStart = (a, b) => moment(a.start).diff(moment(b.start), 'seconds', true)
 const diffHours = (e) => moment(e.end).diff(moment(e.start), 'hours', true)
+const diffMinutes = (e) => moment(e.end).diff(moment(e.start), 'minutes', true)
 const sum = (a, b) => a + b
 
 const byEntriesOfTheDay = (date, issueId) => e => {
@@ -13,12 +20,6 @@ const byEntriesOfTheDay = (date, issueId) => e => {
   } else {
     return sameDay(e.start, date)
   }
-}
-
-const state = {
-  entries: [],
-  current: '',
-  lastFileEvent: null
 }
 
 const mutations = {
@@ -42,16 +43,23 @@ const mutations = {
   },
 
   CLOSE_ENTRY (state, {issueId, end}) {
+    const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
     let opens = state.entries.filter(e => sameDay(e.start, end) && !e.end && e.issueId === issueId)
     if (opens.length) {
       opens[0].end = end
+      if (diffMinutes(opens[0]) <= 1) {
+        removeIt(opens[0])
+      }
     }
     state.current = ''
   },
 
-  CLEAR_TRACKING_ENTRIES (state) {
-    state.entries.length = 0
-    state.current = ''
+  CLEAR_TRACKING_ENTRIES (state, {issueId, date}) {
+    const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
+    state.entries.filter(byEntriesOfTheDay(date, issueId)).forEach(removeIt)
+    if (issueId === state.current) {
+      state.current = ''
+    }
   },
 
   CLEAR_OLD_TRACKING_ENTRIES (state) {
@@ -92,8 +100,8 @@ const actions = {
       commit('CLOSE_ENTRY', {issueId, end})
     }
   },
-  clearTrackingEntries ({commit}) {
-    commit('CLEAR_TRACKING_ENTRIES')
+  clearTrackingEntries ({commit}, {issueId, date = moment()}) {
+    commit('CLEAR_TRACKING_ENTRIES', {issueId, date})
   },
   clearOldTrackingEntries ({commit}) {
     commit('CLEAR_OLD_TRACKING_ENTRIES')
