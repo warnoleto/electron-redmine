@@ -1,11 +1,5 @@
 import moment from 'moment'
 
-const state = {
-  entries: [],
-  current: '',
-  lastFileEvent: null
-}
-
 const sameDay = (dateObject, day) => moment(dateObject).isSame(day, 'day')
 const isToday = (timestamp) => sameDay(timestamp, moment())
 const isCurrentMinute = (timestamp) => moment(timestamp).diff(moment(), 'minutes', true) <= 1
@@ -74,7 +68,7 @@ const mutations = {
     state.entries.filter(byEntriesOfTheDay(date, issueId)).forEach(removeIt)
     if (issueId === state.current) {
     }
-      state.current = ''
+    state.current = ''
   },
 
   CLEAR_OLD_TRACKING_ENTRIES (state) {
