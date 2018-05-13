@@ -2,13 +2,14 @@ import moment from 'moment'
 
 const sameDay = (dateObject, day) => moment(dateObject).isSame(day, 'day')
 const isToday = (timestamp) => sameDay(timestamp, moment())
-const isCurrentMinute = (timestamp) => moment(timestamp).diff(moment(), 'minutes', true) <= 1
+const isCurrentMinute = (timestamp) => moment().diff(moment(timestamp), 'minutes', true) <= 1
 const compareStart = (a, b) => moment(a.start).diff(moment(b.start), 'seconds', true)
 const diffHours = (e) => moment(e.end).diff(moment(e.start), 'hours', true)
-const diffMinutes = (e) => moment(e.end).diff(moment(e.start), 'minutes', true)
+const durationInMinutes = (e) => moment(e.end).diff(moment(e.start), 'minutes', true)
 const sum = (a, b) => a + b
-const isEntryClosed = e => e.end
-const isOpenEntry = e => !isEntryClosed(e)
+const isClosedEntry = e => e.end
+const isOpenEntry = e => !isClosedEntry(e)
+const isBeforeToday = e => moment(e.start).isBefore(moment().startOf('day'))
 
 const byEntriesOfTheDay = (date, issueId) => e => {
   if (issueId) {
@@ -26,37 +27,37 @@ const state = {
 
 const mutations = {
   OPEN_ENTRY (state, {issueId, start}) {
-    if (state.current) {
+    const opens = state.entries.filter(isOpenEntry)
+    opens.filter(isBeforeToday).forEach(e => {
+      e.end = moment(e.start).add(15, 'minutes').toDate()
+    })
+
+    const opensToday = opens.filter(e => sameDay(e.start, start))
+    if (opensToday.length) {
       return
     }
 
-    let opens = state.entries.filter(e => sameDay(e.start, start)).filter(isOpenEntry)
-    let thisLast = state.entries.filter(e => e.issueId === issueId).filter(e => e.end).filter(e => isCurrentMinute(e.end))
-
+    let thisLast = state.entries.filter(e => e.issueId === issueId).filter(isClosedEntry).filter(e => isCurrentMinute(e.end))
     if (thisLast.length) {
       thisLast[0].end = undefined
       state.current = issueId
       return
     }
 
-    if (opens.length) {
-      opens[0].end = start
-    }
     state.entries.push({issueId, start})
     state.current = issueId
     state.lastFileEvent = moment().toDate()
   },
 
   CLOSE_ENTRY (state, {issueId, end}) {
-    const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
     if (issueId && state.current !== issueId) {
       return
     }
-
+    const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
     let opens = state.entries.filter(e => sameDay(e.start, end) && isOpenEntry(e) && e.issueId === issueId)
     if (opens.length) {
       opens[0].end = end
-      if (diffMinutes(opens[0]) <= 1) {
+      if (durationInMinutes(opens[0]) <= 1) {
         removeIt(opens[0])
       }
     }
@@ -68,7 +69,7 @@ const mutations = {
     state.entries.filter(byEntriesOfTheDay(date, issueId)).forEach(removeIt)
     if (issueId === state.current) {
     }
-    state.current = ''
+    state.current = null
   },
 
   CLEAR_OLD_TRACKING_ENTRIES (state) {
@@ -84,7 +85,7 @@ const mutations = {
     }
     state.entries.splice(idx, 1)
     if (!entry.end && isToday(entry.start)) {
-      state.current = ''
+      state.current = null
     }
   },
 

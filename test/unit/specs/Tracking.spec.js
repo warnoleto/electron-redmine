@@ -81,21 +81,67 @@ describe('mutations', () => {
         expect(state.current).to.be.equal(issueId)
       })
     })
+    context('entry started yesterday', () => {
+      before(() => {
+        const previousEntry = {issueId: 2, start: moment().subtract(1, 'day').toDate()}
+        state.entries = [previousEntry]
+        state.current = 1
+        openEntry(state, {issueId, start})
+      })
+      it('should track the informed issueId', () => {
+        expect(state.current).to.be.equal(issueId)
+      })
+      it('should add a new entry', () => {
+        expect(state.entries.length).to.be.equal(2)
+      })
+    })
   })
+
   describe('CLOSE_ENTRY', () => {
     context('when the entry is open', () => {
       before(() => {
-        const previousEntry = {issueId: 1, start: moment().subtract(50, 'seconds').toDate()}
-        end = moment().toDate()
+        const previousEntry = {issueId: 1, start: moment().subtract(61, 'seconds').toDate()}
         state.entries = [previousEntry]
-        state.current = 2
+        state.current = 1
+        end = moment().toDate()
         closeEntry(state, {issueId, end})
       })
       it('should clear current tracking value', () => {
         expect(state.current).to.be.equal(null)
       })
-      it('should set end property to informed value', () => {
+      it('should set end property to informed end value', () => {
         expect(state.entries[0].end).to.be.equal(end)
+      })
+    })
+
+    context('when the entry was recently opened', () => {
+      before(() => {
+        const previousEntry = {issueId: 1, start: moment().subtract(1, 'seconds').toDate()}
+        state.entries = [previousEntry]
+        state.current = 1
+        end = moment().toDate()
+        closeEntry(state, {issueId, end})
+      })
+      it('should clear current tracking value', () => {
+        expect(state.current).to.be.equal(null)
+      })
+      it('should remove the entry', () => {
+        expect(state.entries.length).to.be.equal(0)
+      })
+    })
+    context('when trying to close an entry different of the current one', () => {
+      before(() => {
+        const previousEntry = {issueId: 2, start: moment().subtract(61, 'seconds').toDate()}
+        state.entries = [previousEntry]
+        state.current = 2
+        end = moment().toDate()
+        closeEntry(state, {issueId, end})
+      })
+      it('should not close it', () => {
+        expect(state.entries[0].end).to.be.equal(undefined)
+      })
+      it('should keep the tracking the current issueId', () => {
+        expect(state.current).to.be.equal(2)
       })
     })
   })
