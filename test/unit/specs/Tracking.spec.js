@@ -32,6 +32,9 @@ describe('mutations', () => {
       it('end time of the entry shoud be undefined', () => {
         expect(state.entries[0].end).to.be.equal(undefined)
       })
+      it('last file event should be updated', () => {
+        expect(state.lastFileEvent).to.be.greaterThan(moment().subtract(1, 'seconds').toDate())
+      })
     })
 
     context('there is an open entry for a differente issueId', () => {
