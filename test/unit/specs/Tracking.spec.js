@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import tracking from '@/store/modules/Tracking'
 import moment from 'moment'
 
-const { OPEN_ENTRY: openEntry, CLOSE_ENTRY: closeEntry } = tracking.mutations
+const { OPEN_ENTRY: openEntry, CLOSE_ENTRY: closeEntry, CLEAR_TRACKING_ENTRIES: clearEntries } = tracking.mutations
 const state = { entries: [], current: null, lastFileEvent: null }
 let start = null
 let end = null
@@ -144,6 +144,39 @@ describe('mutations', () => {
         expect(state.entries[0].end).to.be.equal(undefined)
       })
       it('should keep the tracking the current issueId', () => {
+        expect(state.current).to.be.equal(2)
+      })
+    })
+  })
+
+  describe('CLEAR_TRACKING_ENTRIES', () => {
+    beforeEach(() => {
+      const entry1 = {issueId: 1, start: moment().subtract(1, 'day').toDate(), end: moment().subtract(23, 'hours').toDate()}
+      const entry2 = {issueId: 1, start: moment().subtract(6, 'minutes').toDate(), end: moment().subtract(4, 'minutes').toDate()}
+      const entry3 = {issueId: 2, start: moment().subtract(4, 'minutes').toDate(), end: moment().subtract(2, 'minutes').toDate()}
+      const entry4 = {issueId: 2, start: moment().subtract(1, 'minutes').toDate()}
+      state.entries = [entry1, entry2, entry3, entry4]
+      state.current = 2
+    })
+    context('when issueId is not informed', () => {
+      beforeEach(() => {
+        clearEntries(state, {date: moment().toDate()})
+      })
+      it('should remove all entries of the same date', () => {
+        expect(state.entries.length).to.be.equal(1)
+      })
+      it('should clear current tracking', () => {
+        expect(state.current).to.be.equal(null)
+      })
+    })
+    context('when informed issueId is not the current tracking', () => {
+      beforeEach(() => {
+        clearEntries(state, {issueId: 1, date: moment().toDate()})
+      })
+      it('should remove all entries of the same date and issueId', () => {
+        expect(state.entries.length).to.be.equal(3)
+      })
+      it('should keep current tracking', () => {
         expect(state.current).to.be.equal(2)
       })
     })

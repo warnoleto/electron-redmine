@@ -67,9 +67,9 @@ const mutations = {
   CLEAR_TRACKING_ENTRIES (state, {issueId, date}) {
     const removeIt = (e) => state.entries.splice(state.entries.indexOf(e), 1)
     state.entries.filter(byEntriesOfTheDay(date, issueId)).forEach(removeIt)
-    if (issueId === state.current) {
+    if (state.current && state.entries.filter(e => e.issueId === state.current).length === 0) {
+      state.current = null
     }
-    state.current = null
   },
 
   CLEAR_OLD_TRACKING_ENTRIES (state) {
